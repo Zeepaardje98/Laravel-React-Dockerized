@@ -1,0 +1,21 @@
+# Ignore everything except laravel_root
+*
+!laravel_root/
+
+# Within laravel_root, ignore local dependencies (will be installed in container)
+laravel_root/node_modules/
+laravel_root/vendor/
+
+# Build artifacts (will be built in container, or mounted from host system)
+laravel_root/public/build/
+
+# Environment files (mounted from host system)
+laravel_root/.env*
+
+# Cache directories
+# laravel_root/.npm/
+# laravel_root/.eslintcache
+
+# Testing
+# laravel_root/coverage/
+# laravel_root/.phpunit.result.cache
