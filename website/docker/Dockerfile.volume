@@ -30,14 +30,13 @@ COPY --chown=www:www laravel_root/composer.json laravel_root/composer.lock ./
 # Install composer dependencies without running scripts
 RUN composer install --no-scripts
 
-# Copy the Laravel application
+# Copy built assets and node_modules from the Node stage
+COPY --chown=www:www --from=0 /var/www/public/build ./public/build
+COPY --chown=www:www --from=0 /var/www/node_modules ./node_modules
+
+# Copy the Laravel application files
 COPY --chown=www:www laravel_root/ .
 
 # Run composer scripts after all files are in place
 RUN composer run-script post-autoload-dump
 
-# Copy built assets from the Node stage (cached unless frontend changes)
-COPY --chown=www:www --from=0 /var/www/public/build ./public/build
-
-# Copy node_modules from the Node stage so npm dependencies are available
-COPY --chown=www:www --from=0 /var/www/node_modules ./node_modules

@@ -1,0 +1,41 @@
+services:
+  app:
+    image: clusted/searchagent:app
+    container_name: ${APP_NAME}-app
+    restart: unless-stopped
+    volumes:
+      - app_files:/var/www # Volume: Application files to be served by nginx
+      - ./storage/app/public:/var/www/storage/app/public # Bind mount: Public file storage
+      - ./storage/certs/ca-certificate.crt:/var/www/storage/certs/ca-certificate.crt # Bind mount: SSL Certificate for connecting to the Database
+      - .env:/var/www/.env # Bind mount: Application environment variables
+
+  nginx:
+    image: nginx:alpine
+    container_name: ${APP_NAME}-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - app_files:/var/www # Volume: Application files to be served by nginx
+      - ./storage/app/public:/var/www/storage/app/public # Bind mount: Public file storage   
+      - ./docker-compose/nginx/conf.d/:/etc/nginx/conf.d/ # Bind mount: Nginx configuration 
+      - ./certbot/www/:/var/www/certbot/:ro # Bind mount: Certbot files to be served by nginx (for confirming domain ownership)
+      - ./certbot/conf/:/etc/nginx/ssl/:ro # Bind mount: Https certificates from Certbot
+
+  certbot:
+    image: certbot/certbot:latest
+    volumes:
+      - ./certbot/www/:/var/www/certbot/:rw # Bind mount: Certbot files to be served by nginx (for confirming domain ownership)
+      - ./certbot/conf/:/etc/letsencrypt/:rw # Bind mount: Https certificates from Certbot
+
+  # Redis for sessions and caching
+  redis:
+    image: redis:alpine
+    container_name: ${APP_NAME}-redis
+    restart: unless-stopped
+
+
+volumes:
+  app_files:
+    driver: local
