@@ -19,3 +19,4 @@ laravel_root/.env*
 # Testing
 # laravel_root/coverage/
 # laravel_root/.phpunit.result.cache
+laravel_root/phpunit.xml

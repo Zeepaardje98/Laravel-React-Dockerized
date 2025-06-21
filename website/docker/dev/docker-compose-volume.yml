@@ -9,8 +9,8 @@ services:
     volumes:
       - ./.env.local:/var/www/.env
       - app_files:/var/www
-    # depends_on:
-      # - db
+    depends_on:
+      - db
 
   # Nginx Web Server
   nginx:
