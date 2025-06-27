@@ -1,0 +1,84 @@
+services:
+  # Laravel Application
+  app:
+    build:
+      context: ../../
+      dockerfile: docker/Dockerfile.volume
+    container_name: laravel_app_integration
+    restart: unless-stopped
+    volumes:
+      - ./../phpunit.integration.xml:/var/www/phpunit.xml
+      - ./.env.integration:/var/www/.env  # Bind mount: Application environment variables
+      - app_files:/var/www    # Volume: Application files to be served by nginx
+    depends_on:
+      - db
+
+  # Nginx Web Server
+  nginx:
+    image: nginx:alpine
+    container_name: laravel_nginx_integration
+    restart: unless-stopped
+    ports:
+      - "80:80"     # HTTP
+      - "443:443"   # HTTPS
+    volumes:
+      - ./../prod/nginx/nginx.conf:/etc/nginx/nginx.conf:ro                   # Bind mount: Production nginx config
+      - ./../prod/nginx/default.conf.template:/etc/nginx/conf.d/default.conf.template:ro # Bind mount: Production default config
+      - ./../prod/nginx/entrypoint.sh:/entrypoint.sh:ro                       # Bind mount: Entrypoint script
+      - app_files:/var/www                                                    # Volume: Application files to be served by nginx
+      - certs:/etc/nginx/ssl/:ro                                              # Volume: Https certificates from certs container
+    entrypoint: ["/bin/sh", "/entrypoint.sh"]
+    depends_on:
+      - app
+      - certs
+    environment:
+      - APP_DOMAIN=${APP_DOMAIN}     # Make the .env variable for application domain available for generating nginx.conf
+
+  # MySQL Database
+  db:
+    image: mysql:8.0
+    container_name: laravel_db_integration
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_USER: ${DB_USERNAME}
+  
+  # PHPMyAdmin for inspecting the database
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: laravel_phpmyadmin_integration
+    restart: unless-stopped
+    environment:
+      PMA_HOST: db
+      PMA_USER: ${DB_USERNAME}
+      PMA_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - 8080:80
+    depends_on:
+      - db
+
+  # Redis for sessions and caching
+  redis:
+    image: redis:alpine
+    container_name: laravel_redis_integration
+    restart: unless-stopped
+
+  # Certificate Generation Service
+  certs:
+    build:
+      context: ./
+      dockerfile: Dockerfile.certs
+    container_name: laravel_certs_integration
+    command: >
+      sh -c "
+        mkdir -p /etc/nginx/ssl/live/${APP_DOMAIN} &&
+        openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/nginx/ssl/live/${APP_DOMAIN}/privkey.pem -out /etc/nginx/ssl/live/${APP_DOMAIN}/fullchain.pem -subj '/CN=${APP_DOMAIN}'
+      "
+    volumes:
+      - certs:/etc/nginx/ssl/:rw  # Volume: Share the generated SSL certificates with nginx
+
+volumes:
+  app_files:
+  certs:

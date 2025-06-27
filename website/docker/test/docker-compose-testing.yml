@@ -1,0 +1,10 @@
+services:
+  # Laravel Application
+  app:
+    build:
+      context: ../../
+      dockerfile: docker/Dockerfile.volume
+    container_name: laravel_app_testing
+    restart: unless-stopped
+    volumes:
+      - ./.env.testing:/var/www/.env  # Bind mount: Application environment variables
