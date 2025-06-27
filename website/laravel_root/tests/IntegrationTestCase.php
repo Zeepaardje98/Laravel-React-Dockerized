@@ -23,10 +23,10 @@ abstract class IntegrationTestCase extends BaseTestCase
 
         // Ensure integration tests only run in testing environment
         if (config('app.env') !== 'testing') {
-            error_log(config('app.env'));
-            $this->markTestSkipped('Integration tests can only run in testing environments');
+            $this->markTestSkipped('Integration tests can only run in testing environments, as they truncate the main 
+                                    database. Current environment: ' . config('app.env'));
         }
-        
+
         // Set up the database by migrating it once for all integration tests.
         if (!static::$migrated) {
             \Illuminate\Support\Facades\Artisan::call('migrate:fresh');
