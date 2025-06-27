@@ -1,4 +1,5 @@
 <?php
+// php artisan test --filter=AuthenticationTest
 
 use App\Models\User;
 
@@ -11,37 +12,48 @@ test('login screen can be rendered', function () {
 test('users can authenticate using the login screen', function () {
     $user = User::factory()->create();
 
-    $response = $this->postWithXsrf('/login', [
+    // Login
+    $builder = $this->httpRequestBuilder()->withXsrf()->post('/login', [
         'email' => $user->email,
         'password' => 'password',
-    ], '/login');
+    ]);
+    $response = $builder->send();
 
-    $this->assertEquals(302, $response->getStatusCode());
-    $this->assertStringContainsString('/dashboard', $response->getHeaderLine('Location'));
+    // Now try to access a protected route
+    $response = $builder->get('/dashboard')->send();
+
+    $this->assertEquals(200, $response->getStatusCode());
 });
 
 test('users can not authenticate with invalid password', function () {
-    $email = 'integration_' . uniqid() . '@example.com';
-    $password = 'password';
+    $user = User::factory()->create();
 
-    $this->createTestUser($email, $password);
-    $response = $this->postWithXsrf('/login', [
-        'email' => $email,
+    // Failed login
+    $builder = $this->httpRequestBuilder()->withXsrf()->post('/login', [
+        'email' => $user->email,
         'password' => 'wrong-password',
-    ], '/login');
+    ]);
+    $builder->send();
 
+    // Now try to access a protected route
+    $response = $builder->get('/requires-auth')->send();
+
+    // Check if user gets redirected to login
     $this->assertEquals(302, $response->getStatusCode());
     $this->assertStringContainsString('/login', $response->getHeaderLine('Location'));
 });
 
 test('users can logout', function () {
-    $email = 'integration_' . uniqid() . '@example.com';
-    $password = 'password';
+    $user = User::factory()->create();
 
-    $this->createTestUser($email, $password);
-    $this->login($email, $password);
-    $response = $this->postWithXsrf('/logout', [], '/');
+    // Logout the user
+    $builder = $this->httpRequestBuilder()->actingAs($user)->post('/logout', []);
+    $builder->send();
 
+    // Now try to access a protected route
+    $response = $builder->get('/requires-auth')->send();
+
+    // Check if user gets redirected to login
     $this->assertEquals(302, $response->getStatusCode());
-    $this->assertStringContainsString('/', $response->getHeaderLine('Location'));
-}); 
+    $this->assertStringContainsString('/login', $response->getHeaderLine('Location'));
+});

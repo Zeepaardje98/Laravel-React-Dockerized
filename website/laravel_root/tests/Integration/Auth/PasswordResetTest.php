@@ -1,7 +1,8 @@
 <?php
+// php artisan test --filter=PasswordResetTest
 
 test('reset password link screen can be rendered', function () {
-    $response = $this->client->get('/forgot-password');
+    $response = $this->httpRequestBuilder()->get('/forgot-password')->send();
 
     $this->assertEquals(200, $response->getStatusCode());
 });

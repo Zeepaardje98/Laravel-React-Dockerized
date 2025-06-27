@@ -1,14 +1,15 @@
 <?php
+// php artisan test --filter=EmailVerificationTest
+
+use App\Models\User;
 
 test('email verification screen can be rendered', function () {
-    $email = 'integration_' . uniqid() . '@example.com';
-    $password = 'password';
+    $user = User::factory()->unverified()->create();
 
-    $this->createTestUser($email, $password);
-    $this->login($email, $password);
+    $builder = $this->httpRequestBuilder()->actingAs($user);
+    $response = $builder->get('/verify-email')->send();
 
-    $response = $this->client->get('/verify-email');
-
+    // Test 1: Check if email verification screen can be rendered.
     $this->assertEquals(200, $response->getStatusCode());
 });
 
