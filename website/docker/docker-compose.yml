@@ -1,0 +1,100 @@
+services:
+  # Laravel Application
+  app:
+    build:
+      context: ../
+      dockerfile: docker/Dockerfile.laravel-volume
+    container_name: laravel_app_volume
+    restart: unless-stopped
+    volumes:
+      - ./phpunit.xml:/var/www/phpunit.xml
+      - ./${ENV_FILE}:/var/www/.env     # Bind mount: Application environment variables
+      - ${APP_FILES_DIR}:/var/www     # Volume or Bind mount: Application files to be served by nginx
+    depends_on: 
+      - db
+      - redis
+    profiles: ["dev-volume", "dev-bindmount","testing", "production"]
+
+  # Nginx Web Server
+  nginx:
+    image: nginx:alpine
+    container_name: nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"     # HTTP
+      - "443:443"   # HTTPS
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro                   # Bind mount: Production nginx config
+      - ./nginx/default.conf.template:/etc/nginx/conf.d/default.conf.template:ro # Bind mount: Production default config
+      - ./nginx/entrypoint.sh:/entrypoint.sh:ro                       # Bind mount: Entrypoint script
+      - ${APP_FILES_DIR}:/var/www                                                    # Volume: Application files to be served by nginx
+      - certs:/etc/nginx/ssl/:ro                                              # Volume: Https certificates from certs container
+    entrypoint: ["/bin/sh", "/entrypoint.sh"]
+    depends_on:
+      - app
+      # - certbot_fake
+      # - certbot
+    environment:
+      - APP_DOMAIN=${APP_DOMAIN}     # Make the .env variable for application domain available for generating nginx.conf through /entrypoint.sh
+    profiles: ["dev-volume", "dev-bindmount", "testing", "production"]
+
+  # MySQL Database
+  db:
+    image: mysql:8.0
+    container_name: db
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_USER: ${DB_USERNAME}
+    profiles: ["dev-volume", "dev-bindmount", "testing"]
+
+  # PHPMyAdmin for inspecting the database
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: phpmyadmin
+    restart: unless-stopped
+    environment:
+      PMA_HOST: db
+      PMA_USER: ${DB_USERNAME}
+      PMA_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - 8080:80
+    depends_on:
+      - db
+    profiles: ["dev-volume", "dev-bindmount", "testing"]
+
+  # Redis for sessions and caching
+  redis:
+    image: redis:alpine
+    container_name: redis
+    restart: unless-stopped
+    profiles: ["dev-volume", "dev-bindmount", "testing", "production"]
+
+  # Local Certificate Generation Service
+  certbot_fake:
+    build:
+      context: ./
+      dockerfile: Dockerfile.certs
+    container_name: fake_certs
+    command: >
+      sh -c "
+        mkdir -p /etc/nginx/ssl/live/${APP_DOMAIN} &&
+        openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/nginx/ssl/live/${APP_DOMAIN}/privkey.pem -out /etc/nginx/ssl/live/${APP_DOMAIN}/fullchain.pem -subj '/CN=${APP_DOMAIN}'
+      "
+    volumes:
+      - certs:/etc/nginx/ssl/:rw  # Volume: Share the generated SSL certificates with nginx
+    profiles: ["dev-volume", "dev-bindmount", "testing"]
+  # Certbot for generating real SSL certificates
+  certbot:
+    image: certbot/certbot:latest
+    container_name: certbot
+    volumes:
+      - ./certbot/www/:/var/www/certbot/:rw # Bind mount: Certbot files to be served by nginx (for confirming domain ownership)
+      - ./certbot/conf/:/etc/letsencrypt/:rw # Bind mount: Https certificates from Certbot
+    profiles: ["production"]
+
+volumes:
+  app_files:
+  certs:
