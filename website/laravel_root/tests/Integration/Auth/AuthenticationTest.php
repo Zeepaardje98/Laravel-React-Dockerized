@@ -12,6 +12,8 @@ test('login screen can be rendered', function () {
 test('users can authenticate using the login screen', function () {
     $user = User::factory()->create();
 
+    sleep(10);
+
     // Login
     $builder = $this->httpRequestBuilder()->withXsrf()->post('/login', [
         'email' => $user->email,

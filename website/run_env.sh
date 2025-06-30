@@ -40,8 +40,11 @@ case "$MODE" in
     ;;
 esac
 
-# Build the base laravel applicationimage if it doesn't exist or Dockerfile.base has changed
+# Build the base laravel application image if it doesn't exist or Dockerfile.base has changed
 docker build -f docker/Dockerfile.laravel-base -t laravel-base:latest .
+
+# Remove all volumes associated with this compose file (clean start)
+docker-compose -f $COMPOSE_FILE --env-file $ENV_FILE down -v
 
 # Run docker-compose with the selected .env file and profile
 docker-compose -f $COMPOSE_FILE --env-file $ENV_FILE --profile $PROFILE up -d --build 

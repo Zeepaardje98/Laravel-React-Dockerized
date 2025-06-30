@@ -4,13 +4,9 @@ namespace Tests;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Cookie\CookieJar;
-use App\Models\User;
-use Illuminate\Support\Facades\Artisan;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Foundation\Testing\DatabaseTruncation;
-use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 
-abstract class IntegrationTestCase extends BaseTestCase
+abstract class IntegrationTestCase extends TestCase
 {
     use DatabaseTruncation;
 
@@ -20,18 +16,6 @@ abstract class IntegrationTestCase extends BaseTestCase
     protected function setUp(): void
     {
         parent::setUp();
-
-        // Ensure integration tests only run in testing environment
-        if (config('app.env') !== 'testing') {
-            $this->markTestSkipped('Integration tests can only run in testing environments, as they truncate the main 
-                                    database. Current environment: ' . config('app.env'));
-        }
-
-        // Set up the database by migrating it once for all integration tests.
-        if (!static::$migrated) {
-            \Illuminate\Support\Facades\Artisan::call('migrate:fresh');
-            static::$migrated = true;
-        }
 
         // For each test, create a new client with refreshed cookiejar
         $this->client = new Client([
