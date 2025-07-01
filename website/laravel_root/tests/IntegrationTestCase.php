@@ -4,15 +4,11 @@ namespace Tests;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Cookie\CookieJar;
-use App\Models\User;
-use Illuminate\Support\Facades\Artisan;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Foundation\Testing\DatabaseTruncation;
-use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 
-abstract class IntegrationTestCase extends BaseTestCase
+abstract class IntegrationTestCase extends TestCase
 {
-    use DatabaseTruncation;
+    // use DatabaseTruncation;
 
     protected $client;
     protected static $migrated = false;
@@ -20,18 +16,6 @@ abstract class IntegrationTestCase extends BaseTestCase
     protected function setUp(): void
     {
         parent::setUp();
-
-        // Ensure integration tests only run in testing environment
-        if (config('app.env') !== 'testing') {
-            $this->markTestSkipped('Integration tests can only run in testing environments, as they truncate the main 
-                                    database. Current environment: ' . config('app.env'));
-        }
-
-        // Set up the database by migrating it once for all integration tests.
-        if (!static::$migrated) {
-            \Illuminate\Support\Facades\Artisan::call('migrate:fresh');
-            static::$migrated = true;
-        }
 
         // For each test, create a new client with refreshed cookiejar
         $this->client = new Client([
@@ -115,7 +99,7 @@ abstract class IntegrationTestCase extends BaseTestCase
             private function getXsrfToken()
             {
                 // Use lightweight route to set CSRF token cookie
-                $response = $this->client->get('/test/csrf-token');
+                $response = $this->get('/test/csrf-token')->send();
                 
                 $data = json_decode($response->getBody(), true);
 
@@ -135,7 +119,7 @@ abstract class IntegrationTestCase extends BaseTestCase
                 $response = $this->withXsrf()->post('/login', [
                     'email' => $user->email,
                     'password' => $password,
-                ])();
+                ])->send();
 
                 if ($response->getStatusCode() !== 302) {
                     throw new \Exception('Login failed for user: ' . $user->email);
@@ -167,6 +151,9 @@ abstract class IntegrationTestCase extends BaseTestCase
                     $options['query'] = $params;
                 }
 
+                // Always send the x-testing header
+                $options['headers']['X-TESTING'] = app()->environment('testing');
+
                 if ($this->xsrfToken) {
                     $options['headers']['X-CSRF-TOKEN'] = $this->xsrfToken;
                 }
@@ -174,6 +161,7 @@ abstract class IntegrationTestCase extends BaseTestCase
                 // error_log('sending request to ' . $uri);
                 // error_log('method: ' . $method);
                 // error_log('xsrfToken sent with request: ' . $this->xsrfToken);
+                // error_log('env: ' . app()->environment());
 
                 $response = $this->client->request($method, $uri, $options);
 

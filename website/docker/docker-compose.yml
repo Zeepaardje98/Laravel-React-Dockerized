@@ -1,0 +1,101 @@
+services:
+  # Laravel Application
+  app:
+    build:
+      context: ../
+      dockerfile: docker/Dockerfile.laravel-volume
+    container_name: laravel_app
+    restart: unless-stopped
+    volumes:
+      - ./phpunit.xml:/var/www/phpunit.xml
+      - ./${ENV_FILE}:/var/www/.env     # Bind mount: Application environment variables
+      - ${APP_FILES_DIR}:/var/www     # Volume or Bind mount: Application files to be served by nginx
+    depends_on: 
+      - db
+      - redis
+    profiles: ["all", "dev-volume", "dev-bindmount","testing", "production"]
+
+  # Nginx Web Server
+  nginx:
+    build:
+      context: ../
+      dockerfile: docker/Dockerfile.nginx
+    container_name: nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"     # HTTP
+      - "443:443"   # HTTPS
+    volumes:
+      - ${APP_FILES_DIR}:/var/www           # Volume or Bind mount: Application files to be served by nginx
+      - certbot_files:/var/www/certbot/:ro  # Volume: Certbot files to be served by nginx (for confirming domain ownership)
+      - certbot_certs:/etc/nginx/ssl/:ro    # Volume: Https certificates from certs container
+    depends_on:
+      - app
+    environment:
+      - APP_DOMAIN=${APP_DOMAIN}
+    profiles: ["all", "dev-volume", "dev-bindmount", "testing", "production"]
+
+  # MySQL Database
+  mysql_db:
+    build:
+      context: ../
+      dockerfile: docker/Dockerfile.mysql
+      args:
+        MYSQL_DATABASE: ${DB_DATABASE}
+        MYSQL_USER: ${DB_USERNAME}
+        MYSQL_PASSWORD: ${DB_PASSWORD}
+    container_name: db
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_USER: ${DB_USERNAME}
+    profiles: ["all", "dev-volume", "dev-bindmount", "testing"]
+
+  # PHPMyAdmin for inspecting the database
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: phpmyadmin
+    restart: unless-stopped
+    environment:
+      PMA_HOST: db
+      PMA_USER: ${DB_USERNAME}
+      PMA_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - 8080:80
+    depends_on:
+      - db
+    profiles: ["all", "dev-volume", "dev-bindmount", "testing"]
+
+  # Redis for sessions and caching
+  redis:
+    image: redis:alpine
+    container_name: redis
+    restart: unless-stopped
+    profiles: ["all", "dev-volume", "dev-bindmount", "testing", "production"]
+
+  # Local Certificate Generation Service
+  cert_local:
+    build:
+      context: ../
+      dockerfile: docker/Dockerfile.cert-local
+    container_name: cert_local
+    environment:
+      - APP_DOMAIN=${APP_DOMAIN}
+    volumes:
+      - certbot_certs:/etc/nginx/ssl/:rw  # Volume: Share the generated SSL certificates with nginx
+    profiles: ["all", "dev-volume", "dev-bindmount", "testing"]
+  # Certbot for generating real SSL certificates
+  certbot:
+    image: certbot/certbot:latest
+    container_name: certbot
+    volumes:
+      - certbot_files:/var/www/certbot/:rw # Volume: Certbot files to be served by nginx (for confirming domain ownership)
+      - certbot_certs:/etc/letsencrypt/:rw # Volume: Https certificates from Certbot
+    profiles: ["all", "production"]
+
+volumes:
+  app_files:
+  certbot_files:
+  certbot_certs:

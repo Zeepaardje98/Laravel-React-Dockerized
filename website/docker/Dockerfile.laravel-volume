@@ -37,6 +37,9 @@ COPY --chown=www-data:www-data --from=0 /var/www/node_modules ./node_modules
 # Copy the Laravel application files
 COPY --chown=www-data:www-data laravel_root/ .
 
+# Copy the phpunit.xml file for testing
+COPY --chown=www-data:www-data docker/phpunit.xml ./phpunit.xml
+
 # Run composer scripts after all files are in place
 RUN composer run-script post-autoload-dump
 

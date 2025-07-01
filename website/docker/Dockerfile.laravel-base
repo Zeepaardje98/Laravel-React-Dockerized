@@ -16,7 +16,9 @@ RUN apt-get update && apt-get install -y \
     libjpeg-dev \
     # Node.js and npm for frontend assets
     nodejs \
-    npm
+    npm \
+    # mysql-client for testrunning pipeline. Used by clone_db_for_testing.sh
+    default-mysql-client
 
 # Laravels database drivers for MariaDB/mySQL
 RUN docker-php-ext-install pdo pdo_mysql
@@ -42,3 +44,15 @@ RUN chown -R www-data:www-data /var/www
 
 # Expose port 9000
 EXPOSE 9000
+
+# Add a testrunner user and group for running the db cloning script
+RUN groupadd -g 1002 testrunner
+RUN useradd -u 1002 -ms /bin/bash -g testrunner testrunner
+# Remove password for testrunner user (TEMPORARY. REMOVE LATER)
+RUN passwd -d testrunner
+
+# Copy the script for test DB management and running tests
+COPY --chown=testrunner:testrunner scripts/laravel-app/clone_db_for_testing.sh /usr/local/bin/clone_db_for_testing.sh
+COPY --chown=testrunner:testrunner scripts/laravel-app/clone_and_test.sh /usr/local/bin/clone_and_test.sh
+RUN chmod 700 /usr/local/bin/clone_db_for_testing.sh /usr/local/bin/clone_and_test.sh
+
