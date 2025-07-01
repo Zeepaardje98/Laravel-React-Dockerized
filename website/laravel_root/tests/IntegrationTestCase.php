@@ -8,7 +8,7 @@ use Illuminate\Foundation\Testing\DatabaseTruncation;
 
 abstract class IntegrationTestCase extends TestCase
 {
-    use DatabaseTruncation;
+    // use DatabaseTruncation;
 
     protected $client;
     protected static $migrated = false;
@@ -99,7 +99,7 @@ abstract class IntegrationTestCase extends TestCase
             private function getXsrfToken()
             {
                 // Use lightweight route to set CSRF token cookie
-                $response = $this->client->get('/test/csrf-token');
+                $response = $this->get('/test/csrf-token')->send();
                 
                 $data = json_decode($response->getBody(), true);
 
@@ -119,7 +119,7 @@ abstract class IntegrationTestCase extends TestCase
                 $response = $this->withXsrf()->post('/login', [
                     'email' => $user->email,
                     'password' => $password,
-                ])();
+                ])->send();
 
                 if ($response->getStatusCode() !== 302) {
                     throw new \Exception('Login failed for user: ' . $user->email);
@@ -151,6 +151,9 @@ abstract class IntegrationTestCase extends TestCase
                     $options['query'] = $params;
                 }
 
+                // Always send the x-testing header
+                $options['headers']['X-TESTING'] = app()->environment('testing');
+
                 if ($this->xsrfToken) {
                     $options['headers']['X-CSRF-TOKEN'] = $this->xsrfToken;
                 }
@@ -158,6 +161,7 @@ abstract class IntegrationTestCase extends TestCase
                 // error_log('sending request to ' . $uri);
                 // error_log('method: ' . $method);
                 // error_log('xsrfToken sent with request: ' . $this->xsrfToken);
+                // error_log('env: ' . app()->environment());
 
                 $response = $this->client->request($method, $uri, $options);
 

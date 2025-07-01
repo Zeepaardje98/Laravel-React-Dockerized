@@ -13,7 +13,7 @@ services:
     depends_on: 
       - db
       - redis
-    profiles: ["dev-volume", "dev-bindmount","testing", "production"]
+    profiles: ["all", "dev-volume", "dev-bindmount","testing", "production"]
 
   # Nginx Web Server
   nginx:
@@ -33,7 +33,7 @@ services:
       - app
     environment:
       - APP_DOMAIN=${APP_DOMAIN}
-    profiles: ["dev-volume", "dev-bindmount", "testing", "production"]
+    profiles: ["all", "dev-volume", "dev-bindmount", "testing", "production"]
 
   # MySQL Database
   db:
@@ -51,7 +51,7 @@ services:
       MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
       MYSQL_PASSWORD: ${DB_PASSWORD}
       MYSQL_USER: ${DB_USERNAME}
-    profiles: ["dev-volume", "dev-bindmount", "testing"]
+    profiles: ["all", "dev-volume", "dev-bindmount", "testing"]
 
   # PHPMyAdmin for inspecting the database
   phpmyadmin:
@@ -66,14 +66,14 @@ services:
       - 8080:80
     depends_on:
       - db
-    profiles: ["dev-volume", "dev-bindmount", "testing"]
+    profiles: ["all", "dev-volume", "dev-bindmount", "testing"]
 
   # Redis for sessions and caching
   redis:
     image: redis:alpine
     container_name: redis
     restart: unless-stopped
-    profiles: ["dev-volume", "dev-bindmount", "testing", "production"]
+    profiles: ["all", "dev-volume", "dev-bindmount", "testing", "production"]
 
   # Local Certificate Generation Service
   cert_local:
@@ -85,7 +85,7 @@ services:
       - APP_DOMAIN=${APP_DOMAIN}
     volumes:
       - certbot_certs:/etc/nginx/ssl/:rw  # Volume: Share the generated SSL certificates with nginx
-    profiles: ["dev-volume", "dev-bindmount", "testing"]
+    profiles: ["all", "dev-volume", "dev-bindmount", "testing"]
   # Certbot for generating real SSL certificates
   certbot:
     image: certbot/certbot:latest
@@ -93,7 +93,7 @@ services:
     volumes:
       - certbot_files:/var/www/certbot/:rw # Volume: Certbot files to be served by nginx (for confirming domain ownership)
       - certbot_certs:/etc/letsencrypt/:rw # Volume: Https certificates from Certbot
-    profiles: ["production"]
+    profiles: ["all", "production"]
 
 volumes:
   app_files:

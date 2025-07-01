@@ -12,7 +12,7 @@ abstract class TestCase extends BaseTestCase
     {
         parent::setUp();
 
-        // Ensure tests only run in testing environment
+        // Ensure tests only run in testing environment (.env.testing or phpunit.xml is set)
         if (config('app.env') !== 'testing') {
             $this->markTestSkipped('Tests can only run in testing environments, as they truncate the main 
                                     database. Current environment: ' . config('app.env'));
@@ -25,7 +25,7 @@ abstract class TestCase extends BaseTestCase
 
         // Set up the database by migrating it once for all tests.
         if (!static::$migrated) {
-            \Illuminate\Support\Facades\Artisan::call('migrate:fresh');
+            \Illuminate\Support\Facades\Artisan::call('migrate');
             static::$migrated = true;
         }
     }

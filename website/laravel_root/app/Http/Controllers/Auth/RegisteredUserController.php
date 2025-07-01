@@ -36,15 +36,7 @@ class RegisteredUserController extends Controller
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 
-        // Option: Use testing db
-        $userModel = new User();
-        if ($request->boolean('testing')) {
-            error_log("testing request");
-            $userModel->setConnection('mysql_testing');
-        }
-        error_log("test2");
-
-        $user = $userModel->create([
+        $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),

@@ -18,7 +18,6 @@ test('new users can register', function () {
         'email' => $email,
         'password' => 'password',
         'password_confirmation' => 'password',
-        'testing' => true,
     ])->send();
 
     // Test 1: Check if user is redirected to dashboard.
