@@ -64,7 +64,9 @@ return [
 
         'mysql' => $mysql_connection,
         'mysql_testing' => array_merge($mysql_connection, [
-            'database' => env('DB_DATABASE') . '_testing',
+            'database' => env('DB_DATABASE_TESTING'),
+            'username' => env('DB_USERNAME_TESTING', 'root'),
+            'password' => env('DB_PASSWORD_TESTING', ''),
         ]),
 
         'mariadb' => [

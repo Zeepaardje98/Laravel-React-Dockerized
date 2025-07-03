@@ -1,9 +1,15 @@
-CREATE DATABASE IF NOT EXISTS `${MYSQL_DATABASE}_testing`;
+CREATE DATABASE IF NOT EXISTS `${MYSQL_DATABASE_TESTING}`;
 
--- Grant read access to the main DB
-GRANT SELECT, LOCK TABLES, SHOW VIEW, TRIGGER ON `${MYSQL_DATABASE}`.* TO '${MYSQL_USER}'@'%';
+-- Create the testing user if it does not exist
+CREATE USER IF NOT EXISTS '${MYSQL_USER_TESTING}'@'%' IDENTIFIED BY '${MYSQL_PASSWORD_TESTING}';
 
--- Grant all privileges on the test DB
-GRANT ALL PRIVILEGES ON `${MYSQL_DATABASE}_testing`.* TO '${MYSQL_USER}'@'%';
+-- Grant read access to the main DB to the testing user
+GRANT SELECT, LOCK TABLES, SHOW VIEW, TRIGGER ON `${MYSQL_DATABASE}`.* TO '${MYSQL_USER_TESTING}'@'%';
+
+-- Grant all privileges on the test DB to the testing user
+GRANT ALL PRIVILEGES ON `${MYSQL_DATABASE_TESTING}`.* TO '${MYSQL_USER_TESTING}'@'%';
+
+-- Grant read access to the test DB to the main user
+GRANT SELECT, LOCK TABLES, SHOW VIEW, TRIGGER ON `${MYSQL_DATABASE_TESTING}`.* TO '${MYSQL_USER}'@'%';
 
 FLUSH PRIVILEGES;

@@ -10,9 +10,18 @@ services:
       - ./phpunit.xml:/var/www/phpunit.xml
       - ./${ENV_FILE}:/var/www/.env     # Bind mount: Application environment variables
       - ${APP_FILES_DIR}:/var/www     # Volume or Bind mount: Application files to be served by nginx
+    secrets:
+      - mysql_db_rootpass
+      - mysql_app_db_database
+      - mysql_app_db_username
+      - mysql_app_db_password
+      - mysql_testing_db_database
+      - mysql_testing_db_username
+      - mysql_testing_db_password
     depends_on: 
       - mysql_db
       - redis
+    command: ["/bin/sh", "-c", ". /read-db-credentials.sh; exec php-fpm"]
     profiles: ["all", "dev-volume", "dev-bindmount","testing", "production"]
 
   # Nginx Web Server
@@ -40,33 +49,37 @@ services:
     build:
       context: ../
       dockerfile: docker/Dockerfile.mysql
-      args:
-        MYSQL_DATABASE: ${DB_DATABASE}
-        MYSQL_USER: ${DB_USERNAME}
-        MYSQL_PASSWORD: ${DB_PASSWORD}
     container_name: db
     restart: unless-stopped
-    environment:
-      MYSQL_DATABASE: ${DB_DATABASE}
-      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
-      MYSQL_PASSWORD: ${DB_PASSWORD}
-      MYSQL_USER: ${DB_USERNAME}
+    secrets:
+      - mysql_db_rootpass
+      - mysql_app_db_database
+      - mysql_app_db_username
+      - mysql_app_db_password
+      - mysql_testing_db_database
+      - mysql_testing_db_username
+      - mysql_testing_db_password
+    command: ["/bin/sh", "-c", ". /custom-entrypoint.sh; exec /usr/local/bin/docker-entrypoint.sh mysqld"]
     profiles: ["all", "dev-volume", "dev-bindmount", "testing"]
 
-  # PHPMyAdmin for inspecting the database
+  # PHPMyAdmin for inspecting the database, logged in as the admin user used by Laravel
   phpmyadmin:
-    image: phpmyadmin/phpmyadmin
+    image: phpmyadmin/phpmyadmin:latest
     container_name: phpmyadmin
     restart: unless-stopped
     environment:
-      PMA_HOST: db
-      PMA_USER: ${DB_USERNAME}
-      PMA_PASSWORD: ${DB_PASSWORD}
+      PMA_HOST: db  # Must be the same as container_name of the db
+      PMA_USER_FILE: /run/secrets/mysql_app_db_username
+      PMA_PASSWORD_FILE: /run/secrets/mysql_app_db_password
     ports:
       - 8080:80
     depends_on:
       - mysql_db
+    secrets:
+      - mysql_app_db_username
+      - mysql_app_db_password
     profiles: ["all", "dev-volume", "dev-bindmount", "testing"]
+    # command: ["apache2-foreground"]
 
   # Redis for sessions and caching
   redis:
@@ -100,3 +113,19 @@ volumes:
   app_files:
   certbot_files:
   certbot_certs:
+
+secrets:
+  mysql_testing_db_password:
+    file: ./secrets/mysql_testing_db_password
+  mysql_testing_db_username:
+    file: ./secrets/mysql_testing_db_username
+  mysql_testing_db_database:
+    file: ./secrets/mysql_testing_db_database
+  mysql_app_db_password:
+    file: ./secrets/mysql_app_db_password
+  mysql_app_db_username:
+    file: ./secrets/mysql_app_db_username
+  mysql_app_db_database:
+    file: ./secrets/mysql_app_db_database
+  mysql_db_rootpass:
+    file: ./secrets/mysql_db_rootpass

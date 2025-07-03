@@ -51,8 +51,12 @@ RUN useradd -u 1002 -ms /bin/bash -g testrunner testrunner
 # Remove password for testrunner user (TEMPORARY. REMOVE LATER)
 RUN passwd -d testrunner
 
-# Copy the script for test DB management and running tests
+# DB cloning and running tests, only executable by 'testrunner'
 COPY --chown=testrunner:testrunner scripts/laravel-app/clone_db_for_testing.sh /usr/local/bin/clone_db_for_testing.sh
 COPY --chown=testrunner:testrunner scripts/laravel-app/clone_and_test.sh /usr/local/bin/clone_and_test.sh
-RUN chmod 700 /usr/local/bin/clone_db_for_testing.sh /usr/local/bin/clone_and_test.sh
+RUN chmod 500 /usr/local/bin/clone_db_for_testing.sh /usr/local/bin/clone_and_test.sh
+
+# Read-db-credentials.sh script, executable only by 'www-data'
+COPY scripts/laravel-app/read-db-credentials.sh /read-db-credentials.sh
+RUN chown www-data:www-data /read-db-credentials.sh && chmod 500 /read-db-credentials.sh
 
