@@ -35,15 +35,15 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 # Set working directory
 WORKDIR /var/www
 
-# Add user for laravel application
-# RUN groupadd -g 1000 www
-# RUN useradd -u 1000 -ms /bin/bash -g www www
-
 # Set ownership of the working directory to www user
 RUN chown -R www-data:www-data /var/www
 
 # Expose port 9000
 EXPOSE 9000
+
+
+
+# - Scripts for loading in Docker secrets and cloning/testing the laravel database -
 
 # Add a testrunner user and group for running the db cloning script
 RUN groupadd -g 1002 testrunner
@@ -51,12 +51,17 @@ RUN useradd -u 1002 -ms /bin/bash -g testrunner testrunner
 # Remove password for testrunner user (TEMPORARY. REMOVE LATER)
 RUN passwd -d testrunner
 
-# DB cloning and running tests, only executable by 'testrunner'
-COPY --chown=testrunner:testrunner scripts/laravel-app/clone_db_for_testing.sh /usr/local/bin/clone_db_for_testing.sh
-COPY --chown=testrunner:testrunner scripts/laravel-app/clone_and_test.sh /usr/local/bin/clone_and_test.sh
-RUN chmod 500 /usr/local/bin/clone_db_for_testing.sh /usr/local/bin/clone_and_test.sh
+# Create shared group for files/scripts used by both www-data and testrunner
+RUN groupadd sharedscripts
+RUN usermod -a -G sharedscripts www-data && usermod -a -G sharedscripts testrunner
 
-# Read-db-credentials.sh script, executable only by 'www-data'
+# Copy scripts
 COPY scripts/laravel-app/read-db-credentials.sh /read-db-credentials.sh
-RUN chown www-data:www-data /read-db-credentials.sh && chmod 500 /read-db-credentials.sh
+COPY scripts/laravel-app/read-db-credentials-testing.sh /read-db-credentials-testing.sh
+COPY scripts/laravel-app/clone_and_test.sh /usr/local/bin/clone_and_test.sh
+
+# Set permissions
+RUN chown root:www-data /read-db-credentials.sh && chmod 550 /read-db-credentials.sh
+RUN chown root:sharedscripts /read-db-credentials-testing.sh && chmod 550 /read-db-credentials-testing.sh
+RUN chown root:testrunner /usr/local/bin/clone_and_test.sh && chmod 550 /usr/local/bin/clone_and_test.sh
 

@@ -11,7 +11,6 @@ services:
       - ./${ENV_FILE}:/var/www/.env     # Bind mount: Application environment variables
       - ${APP_FILES_DIR}:/var/www     # Volume or Bind mount: Application files to be served by nginx
     secrets:
-      - mysql_db_rootpass
       - mysql_app_db_database
       - mysql_app_db_username
       - mysql_app_db_password
