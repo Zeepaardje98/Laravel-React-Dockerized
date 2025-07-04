@@ -62,9 +62,9 @@ services:
     profiles: ["all", "dev-volume", "dev-bindmount", "testing"]
 
   # PHPMyAdmin for inspecting the database, logged in as the admin user used by Laravel
-  phpmyadmin:
+  phpmyadmin-admin:
     image: phpmyadmin/phpmyadmin:latest
-    container_name: phpmyadmin
+    container_name: phpmyadmin-admin
     restart: unless-stopped
     environment:
       PMA_HOST: db  # Must be the same as container_name of the db
@@ -78,7 +78,23 @@ services:
       - mysql_app_db_username
       - mysql_app_db_password
     profiles: ["all", "dev-volume", "dev-bindmount", "testing"]
-    # command: ["apache2-foreground"]
+  
+  phpmyadmin-testing:
+    image: phpmyadmin/phpmyadmin:latest
+    container_name: phpmyadmin-testing
+    restart: unless-stopped
+    environment:
+      PMA_HOST: db  # Must be the same as container_name of the db
+      PMA_USER_FILE: /run/secrets/mysql_testing_db_username
+      PMA_PASSWORD_FILE: /run/secrets/mysql_testing_db_password
+    ports:
+      - 8081:80
+    depends_on:
+      - mysql_db
+    secrets:
+      - mysql_testing_db_username
+      - mysql_testing_db_password
+    profiles: ["all", "dev-volume", "dev-bindmount", "testing"]
 
   # Redis for sessions and caching
   redis:
