@@ -4,7 +4,7 @@ FROM certbot/certbot:latest
 RUN apt-get update && apt-get install -y cron
 
 # Copy your renewal script
-COPY scripts/certbot/certbot_renew.sh /certbot_renew.sh
+COPY scripts/certbot_renew.sh /certbot_renew.sh
 RUN chmod +x /certbot_renew.sh
 
 # Add cron job: run every day at 2am

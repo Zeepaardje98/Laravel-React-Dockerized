@@ -11,6 +11,3 @@ laravel_root/public/build/
 
 # Environment files (mounted from host system)
 laravel_root/.env*
-
-# Testing
-laravel_root/phpunit.xml

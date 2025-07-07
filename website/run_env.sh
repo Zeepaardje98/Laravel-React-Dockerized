@@ -29,7 +29,7 @@ case "$MODE" in
     ;;
   fake-prod)
     # For simulating production/testing
-    ENV_FILE="docker/.env.fake-prod"
+    ENV_FILE="docker/.env.testing"
     PROFILE="testing"
     ;;
   *)
@@ -41,7 +41,7 @@ case "$MODE" in
 esac
 
 # Build the base laravel application image if it doesn't exist or Dockerfile.base has changed
-docker build -f docker/Dockerfile.laravel-base -t laravel-base:latest .
+docker build -f docker/img_laravel/Dockerfile.laravel-base -t laravel-base:latest .
 
 # Remove all volumes associated with this compose file (clean start)
 docker-compose -f $COMPOSE_FILE --env-file $ENV_FILE --profile all down -v
