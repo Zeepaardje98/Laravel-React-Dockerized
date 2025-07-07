@@ -16,6 +16,7 @@ pest()->extend(Tests\TestCase::class)
     ->in('Feature');
 
 pest()->extend(Tests\IntegrationTestCase::class)
+    ->use(Illuminate\Foundation\Testing\DatabaseTruncation::class)
     ->in('Integration');
 
 /*

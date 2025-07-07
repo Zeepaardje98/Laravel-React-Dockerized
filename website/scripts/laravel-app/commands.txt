@@ -1,8 +1,0 @@
-# For running tests, run this command in the laravel_app container
-sh -c ". /read-db-credentials.sh && php artisan test"
-
-# For migrating the main db, run this command in the laravel_app container
-sh -c ". /read-db-credentials.sh && php artisan migrate"
-
-# For cloning the main db into the testing db, run this command in the laravel_app container
-su testrunner -c "/usr/local/bin/clone_and_test.sh"

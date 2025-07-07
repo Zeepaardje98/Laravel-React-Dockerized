@@ -1,4 +1,8 @@
-# --- Node / Frontend Build Stage ---
+#################################################
+###                                           ###
+###   Node / front-end build stage.           ###
+###                                           ###
+#################################################
 FROM node:18
 
 # Set working directory
@@ -18,7 +22,11 @@ COPY laravel_root/resources ./resources
 RUN npm run build
 
 
-# --- Laravel / Backend Build Stage ---
+#################################################
+###                                           ###
+###   Laravel / back-end build stage.         ###
+###                                           ###
+#################################################
 FROM laravel-base:latest
 
 # Switch to www user
@@ -37,8 +45,12 @@ COPY --chown=www-data:www-data --from=0 /var/www/node_modules ./node_modules
 # Copy the Laravel application files
 COPY --chown=www-data:www-data laravel_root/ .
 
-# Copy the phpunit.xml file for testing
-COPY --chown=www-data:www-data docker/phpunit.xml ./phpunit.xml
+# Give testrunner full access to the logs
+RUN chown -R www-data:shared /var/www/storage/logs \
+    && chmod -R 770 /var/www/storage/logs
+# Give testrunner full access to compiled blade views
+RUN chown -R www-data:shared /var/www/storage/framework/views \
+    && chmod -R 770 /var/www/storage/framework/views
 
 # Run composer scripts after all files are in place
 RUN composer run-script post-autoload-dump

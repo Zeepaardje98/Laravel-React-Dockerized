@@ -10,10 +10,10 @@ LOGFILE=/var/log/cronjobs.log
         echo -e "\nJOB SUCCESS" || \
         echo -e "\nJOB FAILED";
     # Attempt to reload nginx if possible (requires docker socket mount)
-    if command -v docker >/dev/null 2>&1; then
-        docker exec nginx nginx -s reload && echo "Nginx reloaded" || echo "Failed to reload Nginx";
-    else
-        echo "Docker not available, cannot reload Nginx automatically.";
-    fi
+    # if command -v docker >/dev/null 2>&1; then
+    #     docker exec nginx nginx -s reload && echo "Nginx reloaded" || echo "Failed to reload Nginx";
+    # else
+    #     echo "Docker not available, cannot reload Nginx automatically.";
+    # fi
     echo -e '------------------------------------------------------------\n\n';
 } >> "$LOGFILE" 2>&1
