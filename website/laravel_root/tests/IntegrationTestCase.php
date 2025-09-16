@@ -4,12 +4,9 @@ namespace Tests;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Cookie\CookieJar;
-use Illuminate\Foundation\Testing\DatabaseTruncation;
 
 abstract class IntegrationTestCase extends TestCase
 {
-    // use DatabaseTruncation;
-
     protected $client;
     protected static $migrated = false;
 
@@ -157,11 +154,6 @@ abstract class IntegrationTestCase extends TestCase
                 if ($this->xsrfToken) {
                     $options['headers']['X-CSRF-TOKEN'] = $this->xsrfToken;
                 }
-
-                // error_log('sending request to ' . $uri);
-                // error_log('method: ' . $method);
-                // error_log('xsrfToken sent with request: ' . $this->xsrfToken);
-                // error_log('env: ' . app()->environment());
 
                 $response = $this->client->request($method, $uri, $options);
 
