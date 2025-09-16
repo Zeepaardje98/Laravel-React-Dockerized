@@ -4,12 +4,9 @@ namespace Tests;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Cookie\CookieJar;
-use Illuminate\Foundation\Testing\DatabaseTruncation;
 
 abstract class IntegrationTestCase extends TestCase
 {
-    // use DatabaseTruncation;
-
     protected $client;
     protected static $migrated = false;
 

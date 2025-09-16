@@ -1,1 +1,0 @@
-docker exec -u testrunner laravel_app sh -c '. /usr/local/bin/clone_and_test.sh'
