@@ -5,7 +5,7 @@ This directory contains Terraform configurations for deploying infrastructure ac
 ## Available Providers
 
 ### DigitalOcean
-- **Basic Droplet** (`providers/digitalocean/basic-droplet/`) - Single Ubuntu droplet (~$6/month)
+- **Basic Droplet** (`digitalocean/basic-droplet/`) - Single Ubuntu droplet (~$6/month)
 - **Future Configurations**: Managed database, load balancer, Kubernetes cluster
 
 ### Future Providers
@@ -16,7 +16,7 @@ This directory contains Terraform configurations for deploying infrastructure ac
 
 1. **Choose a configuration**:
    ```bash
-   cd providers/digitalocean/basic-droplet/
+   cd digitalocean/basic-droplet/
    ```
 
 2. **Configure variables**:
@@ -107,17 +107,15 @@ source .github/workflows/scripts/set-env.sh
 
 ```
 deployment/terraform/
-├── providers/
-│   ├── digitalocean/
-│   │   ├── basic-droplet/
-│   │   │   ├── main.tf
-│   │   │   ├── variables.tf
-│   │   │   ├── outputs.tf
-│   │   │   ├── terraform.tfvars.example
-│   │   │   └── README.md
-│   │   └── README.md
-│   ├── aws/          # Future
-│   └── gcp/          # Future
+├── digitalocean/
+│   └── basic-droplet/
+│       ├── main.tf
+│       ├── variables.tf
+│       ├── outputs.tf
+│       ├── terraform.tfvars.example
+│       └── README.md
+├── aws/              # Future
+├── gcp/              # Future
 ├── .gitignore
 └── README.md         # This file
 ```
@@ -139,8 +137,8 @@ deployment/terraform/
 
 To add a new configuration:
 
-1. Create a new directory: `mkdir providers/new-provider/new-config/`
-2. Copy the basic structure from `basic-droplet/`
+1. Create a new directory: `mkdir new-provider/new-config/`
+2. Copy the basic structure from `digitalocean/basic-droplet/`
 3. Modify the Terraform files as needed
 4. Update this README to document the new configuration
 5. Add any new secrets to GitHub Actions workflow

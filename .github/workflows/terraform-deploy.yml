@@ -67,28 +67,28 @@ jobs:
     - name: Terraform Format
       id: fmt
       run: terraform fmt -check
-      working-directory: deployment/terraform/providers/${{ env.PROVIDER }}/${{ env.TERRAFORM_CONFIG }}
+      working-directory: deployment/terraform/${{ env.PROVIDER }}/${{ env.TERRAFORM_CONFIG }}
       continue-on-error: true
 
     - name: Terraform Init
       id: init
       run: terraform init
-      working-directory: deployment/terraform/providers/${{ env.PROVIDER }}/${{ env.TERRAFORM_CONFIG }}
+      working-directory: deployment/terraform/${{ env.PROVIDER }}/${{ env.TERRAFORM_CONFIG }}
 
     - name: Create Terraform Workspace
       run: |
         terraform workspace new $ENVIRONMENT || terraform workspace select $ENVIRONMENT
-      working-directory: deployment/terraform/providers/${{ env.PROVIDER }}/${{ env.TERRAFORM_CONFIG }}
+      working-directory: deployment/terraform/${{ env.PROVIDER }}/${{ env.TERRAFORM_CONFIG }}
 
     - name: Terraform Validate
       id: validate
       run: terraform validate -no-color
-      working-directory: deployment/terraform/providers/${{ env.PROVIDER }}/${{ env.TERRAFORM_CONFIG }}
+      working-directory: deployment/terraform/${{ env.PROVIDER }}/${{ env.TERRAFORM_CONFIG }}
 
     - name: Terraform Plan
       id: plan
       run: terraform plan -no-color -out=tfplan
-      working-directory: deployment/terraform/providers/${{ env.PROVIDER }}/${{ env.TERRAFORM_CONFIG }}
+      working-directory: deployment/terraform/${{ env.PROVIDER }}/${{ env.TERRAFORM_CONFIG }}
 
     - name: Terraform Plan Status
       if: steps.plan.outcome == 'failure'
@@ -96,8 +96,8 @@ jobs:
 
     - name: Terraform Apply
       run: terraform apply -auto-approve tfplan
-      working-directory: deployment/terraform/providers/${{ env.PROVIDER }}/${{ env.TERRAFORM_CONFIG }}
+      working-directory: deployment/terraform/${{ env.PROVIDER }}/${{ env.TERRAFORM_CONFIG }}
 
     - name: Terraform Output
       run: terraform output -json
-      working-directory: deployment/terraform/providers/${{ env.PROVIDER }}/${{ env.TERRAFORM_CONFIG }}
+      working-directory: deployment/terraform/${{ env.PROVIDER }}/${{ env.TERRAFORM_CONFIG }}
