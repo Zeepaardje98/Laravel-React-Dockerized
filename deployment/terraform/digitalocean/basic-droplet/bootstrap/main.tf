@@ -16,9 +16,12 @@ provider "digitalocean" {
   token = var.do_token
 }
 
-# Get project information
-data "digitalocean_project" "main" {
-  id = var.do_project_id
+# Create or get project information
+resource "digitalocean_project" "main" {
+  name        = var.project_name
+  description = "Project for ${var.project_name} infrastructure"
+  purpose     = "Web Application"
+  environment = "Development"
 }
 
 # Create DigitalOcean Space for remote state
@@ -29,6 +32,6 @@ resource "digitalocean_spaces_bucket" "terraform_state" {
 
 # Assign Space to project
 resource "digitalocean_project_resources" "space" {
-  project   = var.do_project_id
+  project   = digitalocean_project.main.id
   resources = [digitalocean_spaces_bucket.terraform_state.urn]
 }

@@ -6,6 +6,7 @@ This directory contains the bootstrap configuration for creating DigitalOcean Sp
 
 The bootstrap configuration creates the foundational infrastructure needed for Terraform remote state storage:
 
+- **DigitalOcean Project** - Organizes all your infrastructure resources
 - **DigitalOcean Space** - For storing Terraform state files
 - **Project assignment** - Assigns the Space to your DigitalOcean project
 
@@ -14,12 +15,10 @@ The bootstrap configuration creates the foundational infrastructure needed for T
 ### Prerequisites
 
 1. **DigitalOcean API Token** with the following permissions:
-   - Droplets: Read and Write
-   - SSH Keys: Read
-   - Projects: Read and Write
-   - Spaces: Read and Write
+   - Projects: Read and Write (to create project)
+   - Spaces: Read and Write (to create Space)
 
-2. **DigitalOcean Project ID** - Get from your DigitalOcean console
+2. **Project Name** - Choose a name for your DigitalOcean project (will be created automatically)
 
 ### Setup
 
@@ -29,11 +28,6 @@ The bootstrap configuration creates the foundational infrastructure needed for T
    ```
 
 2. **Edit terraform.tfvars** with your values:
-   ```hcl
-   do_token = "your-actual-token"
-   region = "ams3"
-   do_project_id = "your-actual-project-id"
-   ```
 
 3. **Initialize and apply**:
    ```bash
@@ -46,6 +40,8 @@ The bootstrap configuration creates the foundational infrastructure needed for T
 
 After successful deployment, this configuration outputs:
 
+- `project_id` - **IMPORTANT**: Use this in your main terraform.tfvars
+- `project_name` - Name of the created project
 - `space_name` - Name of the created Space
 - `space_region` - Region of the Space
 - `space_endpoint` - Endpoint URL for the Space
@@ -55,17 +51,10 @@ After successful deployment, this configuration outputs:
 
 After running the bootstrap configuration:
 
-1. **Get Spaces credentials** from DigitalOcean Console → API → Spaces Keys
-2. **Configure your main infrastructure** to use remote state
-3. **Migrate to remote backend** in your main configuration
-
-## Cleanup
-
-This is a one-time setup. After migrating to remote state, you can:
-
-- **Keep this configuration** for future reference
-- **Remove it** if you no longer need it
-- **Use it again** if you need to recreate the Space
+1. **Save the project_id** from the output (you'll need this for main config)
+2. **Get Spaces credentials** from DigitalOcean Console → API → Spaces Keys
+3. **Configure your main infrastructure** with the project_id and Spaces credentials
+4. **Deploy your main infrastructure** using the remote state
 
 ## Security
 

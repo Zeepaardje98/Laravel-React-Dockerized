@@ -19,3 +19,13 @@ output "space_urn" {
   description = "URN of the created Space"
   value       = digitalocean_spaces_bucket.terraform_state.urn
 }
+
+output "project_id" {
+  description = "ID of the created project"
+  value       = digitalocean_project.main.id
+}
+
+output "project_name" {
+  description = "Name of the created project"
+  value       = digitalocean_project.main.name
+}

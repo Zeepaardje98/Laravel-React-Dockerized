@@ -12,7 +12,7 @@ variable "region" {
   default     = "nyc1"
 }
 
-variable "do_project_id" {
-  description = "DigitalOcean project ID to assign resources to"
+variable "project_name" {
+  description = "Name for the DigitalOcean project"
   type        = string
 }
