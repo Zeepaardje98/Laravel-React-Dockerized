@@ -48,6 +48,9 @@ jobs:
         DO_DROPLET_NAME: ${{ vars.DO_DROPLET_NAME }}
         DO_REGION: ${{ vars.DO_REGION }}
         DO_SSH_KEY_NAME: ${{ vars.DO_SSH_KEY_NAME }}
+        # DigitalOcean Spaces (for remote state)
+        DO_SPACES_ACCESS_KEY: ${{ secrets.DO_SPACES_ACCESS_KEY }}
+        DO_SPACES_SECRET_KEY: ${{ secrets.DO_SPACES_SECRET_KEY }}
         # AWS
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}

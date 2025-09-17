@@ -19,11 +19,8 @@ This directory contains Terraform configurations for deploying infrastructure ac
    cd digitalocean/basic-droplet/
    ```
 
-2. **Configure variables**:
-   ```bash
-   cp terraform.tfvars.example terraform.tfvars
-   # Edit terraform.tfvars with your values
-   ```
+2. **Follow provider-specific setup**:
+   Each provider has its own setup instructions. See the individual provider READMEs for detailed steps.
 
 3. **Deploy**:
    ```bash
@@ -55,53 +52,11 @@ terraform apply -var="environment=prod"
 
 ## GitHub Actions Integration
 
-The repository includes GitHub Actions workflows for automated deployments:
+The repository includes GitHub Actions workflows for automated deployments. See `.github/workflows/README.md` for detailed setup instructions and configuration.
 
-- **Staging deployment** - automatic on push to `staging` branch
-- **Production deployment** - automatic on push to `production` branch
-- **Manual deployment** with environment selection (dev, staging, or production)
-- **Secure secrets management** via GitHub Secrets
-- **Dev environment** - deploy via GitHub Actions or manually using workspaces
-
-See `.github/workflows/terraform-deploy.yml` for details.
-
-## Configuration Management
-
-### Environment Variables
-Use the provided script to set environment variables:
-```bash
-source .github/workflows/scripts/set-env.sh
-```
-
-### GitHub Configuration
-
-#### Repository Secrets (Settings → Secrets and variables → Actions → Secrets)
-**DigitalOcean:**
-- `DO_TOKEN` - Your DigitalOcean API token
-
-**AWS:**
-- `AWS_ACCESS_KEY_ID` - AWS access key
-- `AWS_SECRET_ACCESS_KEY` - AWS secret key
-
-**GCP:**
-- `GCP_CREDENTIALS` - GCP service account JSON
-
-#### Repository Variables (Settings → Secrets and variables → Actions → Variables)
-**DigitalOcean:**
-- `DO_DROPLET_NAME` - Droplet name (e.g., "my-app-staging")
-- `DO_REGION` - DigitalOcean region (e.g., "nyc1")
-- `DO_SSH_KEY_NAME` - SSH key name (e.g., "my-laptop-key")
-
-**AWS:**
-- `AWS_REGION` - AWS region (e.g., "us-east-1")
-
-**GCP:**
-- `GCP_PROJECT_ID` - GCP project ID (e.g., "my-project-123")
-
-**Common:**
-- `PROJECT_NAME` - Project name (e.g., "my-app")
-- `PROVIDER` - Cloud provider (e.g., "digitalocean")
-- `TERRAFORM_CONFIG` - Terraform configuration directory (e.g., "basic-droplet")
+**Features:**
+- **Automatic deployments** on branch pushes
+- **Manual deployments** with environment selection
 
 ## Directory Structure
 
@@ -109,6 +64,12 @@ source .github/workflows/scripts/set-env.sh
 deployment/terraform/
 ├── digitalocean/
 │   └── basic-droplet/
+│       ├── bootstrap/
+│       │   ├── main.tf
+│       │   ├── variables.tf
+│       │   ├── outputs.tf
+│       │   ├── terraform.tfvars.example
+│       │   └── README.md
 │       ├── main.tf
 │       ├── variables.tf
 │       ├── outputs.tf
@@ -122,7 +83,7 @@ deployment/terraform/
 
 ## Best Practices
 
-1. **State Management**: Use remote state storage for team collaboration
+1. **State Management**: Remote state storage configured for team collaboration
 2. **Secrets**: Never commit API tokens or sensitive data
 3. **Tagging**: All resources are tagged with project and environment
 4. **Naming**: Use consistent naming conventions
