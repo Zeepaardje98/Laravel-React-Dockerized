@@ -1,0 +1,11 @@
+# DigitalOcean API Token
+do_token = "your_digitalocean_api_token_here"
+
+# Droplet configuration
+droplet_name = "app"
+region       = "nyc1"  # Options: nyc1, nyc2, nyc3, sfo1, sfo2, sfo3, tor1, ams2, ams3, fra1, lon1, sing1, sgp1, blr1
+ssh_key_name = "default"  # Name of your SSH key in DigitalOcean
+
+# Environment and project settings
+environment  = "dev"  # dev, staging, prod
+project_name = "laravel-react-starterkit"

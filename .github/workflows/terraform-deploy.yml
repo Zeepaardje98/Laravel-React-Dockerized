@@ -1,0 +1,103 @@
+name: Terraform Deploy
+
+on:
+  push:
+    branches: [ staging, production ]
+    paths: [ 'deployment/terraform/**' ]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy'
+        required: true
+        type: choice
+        options:
+        - dev
+        - staging
+        - production
+      provider:
+        description: 'Cloud provider'
+        required: true
+        type: choice
+        options:
+        - digitalocean
+        - aws
+        - gcp
+
+env:
+  TF_VERSION: '1.6.0'
+
+jobs:
+  terraform:
+    name: 'Terraform'
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment }}
+    
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v3
+      with:
+        terraform_version: ${{ env.TF_VERSION }}
+
+    - name: Set Environment Variables
+      env:
+        # DigitalOcean
+        DO_TOKEN: ${{ secrets.DO_TOKEN }}
+        DO_DROPLET_NAME: ${{ vars.DO_DROPLET_NAME }}
+        DO_REGION: ${{ vars.DO_REGION }}
+        DO_SSH_KEY_NAME: ${{ vars.DO_SSH_KEY_NAME }}
+        # AWS
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        AWS_REGION: ${{ vars.AWS_REGION }}
+        # GCP
+        GCP_PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
+        GCP_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }}
+        # Common
+        ENVIRONMENT: ${{ github.ref == 'refs/heads/staging' && 'staging' || github.ref == 'refs/heads/production' && 'production' || github.event.inputs.environment }}
+        PROJECT_NAME: ${{ vars.PROJECT_NAME }}
+        PROVIDER: ${{ github.event.inputs.provider || vars.PROVIDER }}
+        TERRAFORM_CONFIG: ${{ vars.TERRAFORM_CONFIG }}
+      run: |
+        source .github/workflows/scripts/set-env.sh
+        echo "Environment variables set for $ENVIRONMENT"
+
+    - name: Terraform Format
+      id: fmt
+      run: terraform fmt -check
+      working-directory: deployment/terraform/providers/${{ env.PROVIDER }}/${{ env.TERRAFORM_CONFIG }}
+      continue-on-error: true
+
+    - name: Terraform Init
+      id: init
+      run: terraform init
+      working-directory: deployment/terraform/providers/${{ env.PROVIDER }}/${{ env.TERRAFORM_CONFIG }}
+
+    - name: Create Terraform Workspace
+      run: |
+        terraform workspace new $ENVIRONMENT || terraform workspace select $ENVIRONMENT
+      working-directory: deployment/terraform/providers/${{ env.PROVIDER }}/${{ env.TERRAFORM_CONFIG }}
+
+    - name: Terraform Validate
+      id: validate
+      run: terraform validate -no-color
+      working-directory: deployment/terraform/providers/${{ env.PROVIDER }}/${{ env.TERRAFORM_CONFIG }}
+
+    - name: Terraform Plan
+      id: plan
+      run: terraform plan -no-color -out=tfplan
+      working-directory: deployment/terraform/providers/${{ env.PROVIDER }}/${{ env.TERRAFORM_CONFIG }}
+
+    - name: Terraform Plan Status
+      if: steps.plan.outcome == 'failure'
+      run: exit 1
+
+    - name: Terraform Apply
+      run: terraform apply -auto-approve tfplan
+      working-directory: deployment/terraform/providers/${{ env.PROVIDER }}/${{ env.TERRAFORM_CONFIG }}
+
+    - name: Terraform Output
+      run: terraform output -json
+      working-directory: deployment/terraform/providers/${{ env.PROVIDER }}/${{ env.TERRAFORM_CONFIG }}
