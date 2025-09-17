@@ -8,7 +8,7 @@ variable "do_token" {
 variable "droplet_name" {
   description = "Name of the droplet"
   type        = string
-  default     = "laravel-app"
+  default     = "droplet"
 }
 
 variable "region" {
@@ -20,7 +20,6 @@ variable "region" {
 variable "ssh_key_name" {
   description = "Name of the SSH key in DigitalOcean"
   type        = string
-  default     = "default"
 }
 
 variable "environment" {
@@ -29,8 +28,21 @@ variable "environment" {
   default     = "dev"
 }
 
-variable "project_name" {
-  description = "Project name for tagging"
+variable "do_project_id" {
+  description = "DigitalOcean project ID to assign resources to"
   type        = string
-  default     = "laravel-react-app"
+}
+
+variable "do_spaces_access_key" {
+  description = "DigitalOcean Spaces access key for remote state"
+  type        = string
+  sensitive   = true
+  default     = null
+}
+
+variable "do_spaces_secret_key" {
+  description = "DigitalOcean Spaces secret key for remote state"
+  type        = string
+  sensitive   = true
+  default     = null
 }
