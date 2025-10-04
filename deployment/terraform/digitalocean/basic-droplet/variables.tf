@@ -8,13 +8,11 @@ variable "do_token" {
 variable "droplet_name" {
   description = "Name of the droplet"
   type        = string
-  default     = "droplet"
 }
 
 variable "region" {
   description = "DigitalOcean region"
   type        = string
-  default     = "nyc1"
 }
 
 variable "ssh_key_name" {
@@ -25,12 +23,23 @@ variable "ssh_key_name" {
 variable "environment" {
   description = "Environment name (dev, staging, prod)"
   type        = string
-  default     = "dev"
 }
 
-variable "do_project_id" {
-  description = "DigitalOcean project ID to assign resources to"
+variable "project_name" {
+  description = "Name of the DigitalOcean project"
   type        = string
+}
+
+variable "project_description" {
+  description = "Description of the DigitalOcean project"
+  type        = string
+  default     = "Project for basic droplet deployment"
+}
+
+variable "project_purpose" {
+  description = "Purpose of the DigitalOcean project"
+  type        = string
+  default     = "Web Application"
 }
 
 variable "do_spaces_access_key" {

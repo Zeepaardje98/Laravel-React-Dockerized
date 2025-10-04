@@ -9,8 +9,10 @@ ssh_key_name = "default"  # Name of your SSH key in DigitalOcean
 # Environment and project settings
 environment  = "dev"  # dev, staging, prod
 
-# DigitalOcean project (required)
-do_project_id = "your-project-id-here"  # Get from DigitalOcean console
+# DigitalOcean project configuration
+project_name        = "Basic Droplet Project"
+project_description = "Project for basic droplet deployment"
+project_purpose     = "Web Application"
 
 # DigitalOcean Spaces (for remote state - add after bootstrap)
 # do_spaces_access_key = "your-spaces-access-key-here"

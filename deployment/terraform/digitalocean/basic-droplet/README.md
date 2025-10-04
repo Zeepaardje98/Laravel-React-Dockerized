@@ -11,53 +11,47 @@ This Terraform configuration creates a single Ubuntu droplet on DigitalOcean usi
 
 ## Configuration
 
-### Step 1: Bootstrap Setup
-First, you must run the bootstrap configuration to create the DigitalOcean project and Space:
+### Step 1: Create Spaces Access Keys
+**IMPORTANT**: You must create DigitalOcean Spaces access keys manually first:
+
+1. Go to [DigitalOcean Console → API → Spaces Keys](https://cloud.digitalocean.com/account/api/spaces)
+2. Click "Generate New Key"
+3. Name it something like "terraform-bootstrap"
+4. Copy the Access Key ID and Secret Key
+
+### Step 2: Optional - Organization Setup (for shared infrastructure)
+If you want to use shared organization infrastructure, run the organization configuration:
 
 ```bash
-# Navigate to bootstrap directory
-cd bootstrap/
+# Navigate to organization directory
+cd ../organization/
 
 # Copy and configure variables
 cp terraform.tfvars.example terraform.tfvars
 # Edit terraform.tfvars with your values:
 # - do_token: Your DigitalOcean API token
 # - region: DigitalOcean region (e.g., "nyc1")
-# - project_name: Name for your project (will be created automatically)
+# - project_name: Name for your organization project (will be created automatically)
+# - do_spaces_access_id: Your Spaces access key ID (from Step 1)
+# - do_spaces_secret_key: Your Spaces secret key (from Step 1)
 
 # Create the project and Space
 terraform init
 terraform apply
-
-# Get the project ID for main configuration
-terraform output project_id
 ```
 
-### Step 2: Main Configuration
-After bootstrap completes, configure the main deployment:
+### Step 3: Main Configuration
+Configure the main deployment:
 
 ```bash
-# Navigate back to main directory
-cd ../
-
 # Copy the example variables file
 cp terraform.tfvars.example terraform.tfvars
 ```
 
-**Edit `terraform.tfvars`** with your values:
-   ```hcl
-   do_token = "your_actual_api_token_here"
-   droplet_name = "my-laravel-app"
-   region = "nyc1"
-   ssh_key_name = "my-ssh-key"
-   environment = "dev"
-   do_project_id = "project-id-from-bootstrap-output"  # From bootstrap step
-   do_spaces_access_key = "your-spaces-access-key"     # From DigitalOcean console
-   do_spaces_secret_key = "your-spaces-secret-key"     # From DigitalOcean console
-   ```
+**Edit `terraform.tfvars`** with your values
 
-### Step 3: Deploy Infrastructure
-After completing the bootstrap and configuration steps:
+### Step 4: Deploy Infrastructure
+After completing the configuration steps:
 
 1. **Initialize Terraform with remote backend**:
    ```bash
@@ -80,9 +74,10 @@ After completing the bootstrap and configuration steps:
    ```
 
 ### Important Notes:
-- **Bootstrap must be run first** - it creates the project and Space required for remote state
-- **Project ID is required** - get it from bootstrap output
-- **Spaces credentials are required** - generate them in DigitalOcean console after bootstrap
+- **Project creation** - This configuration creates its own DigitalOcean project
+- **Self-contained** - No external dependencies on organization infrastructure
+- **Spaces credentials** - Only needed if you want to use remote state storage
+- **Standalone deployment** - Can be deployed independently
 
 ## Usage
 
@@ -102,6 +97,8 @@ After deployment, Terraform will output:
 - `droplet_id`: The DigitalOcean ID of the droplet
 - `droplet_name`: The name of the droplet
 - `region`: The region where the droplet is deployed
+- `project_id`: The ID of the created project
+- `project_name`: The name of the created project
 
 ## Connecting to Your Droplet
 
@@ -118,20 +115,21 @@ Replace `<droplet_ip>` with the IP address from the Terraform output.
 This configuration uses DigitalOcean Spaces for remote state storage to enable team collaboration and consistent deployments between local and GitHub Actions.
 
 ### How It Works:
-- **Bootstrap creates** the DigitalOcean project and Space
-- **Main configuration** uses the Space for remote state storage
-- **Each workspace** (dev, staging, production) gets its own state file in the Space
+- **Self-contained project** - Creates its own DigitalOcean project
+- **Optional remote state** - Can use DigitalOcean Spaces for remote state storage
+- **Each workspace** (dev, staging, production) gets its own state file
 - **CI/CD pipelines** can access the same state as local development
+- **Independent deployment** - No dependencies on external infrastructure
 
-### Required Credentials:
-After running bootstrap, you need to:
+### Optional Remote State Setup:
+If you want to use remote state storage:
 
 1. **Generate Spaces Keys**:
    - Go to DigitalOcean → API → Spaces Keys
    - Generate New Key
    - Note down the access key and secret key
 
-2. **Configure GitHub Secrets**:
+2. **Configure GitHub Secrets** (for CI/CD):
    - `DO_SPACES_ACCESS_KEY` - Your Spaces access key
    - `DO_SPACES_SECRET_KEY` - Your Spaces secret key
 
@@ -141,10 +139,24 @@ After running bootstrap, you need to:
    do_spaces_secret_key = "your-spaces-secret-key"
    ```
 
-### Bootstrap State Management:
-- **Bootstrap state** remains local (not needed for CI/CD)
-- **Main configuration** uses the Space for remote state
-- **One-time setup** - bootstrap only needs to be run once
+4. **Configure backend** in main.tf:
+   ```hcl
+   terraform {
+     backend "s3" {
+       endpoint   = "your-space-endpoint"
+       bucket     = "your-space-name"
+       key        = "basic-droplet/terraform.tfstate"
+       region     = "your-space-region"
+       # ... other backend config
+     }
+   }
+   ```
+
+### State Management:
+- **Local state** - Default behavior, state stored locally
+- **Optional remote state** - Can use DigitalOcean Spaces for team collaboration
+- **Self-contained** - No dependencies on external organization infrastructure
+- **Independent** - Can be deployed and managed separately
 
 ## Next Steps
 

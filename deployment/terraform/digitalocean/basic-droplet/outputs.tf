@@ -17,3 +17,13 @@ output "region" {
   description = "Region of the droplet"
   value       = digitalocean_droplet.app.region
 }
+
+output "project_id" {
+  description = "ID of the created project"
+  value       = digitalocean_project.main.id
+}
+
+output "project_name" {
+  description = "Name of the created project"
+  value       = digitalocean_project.main.name
+}

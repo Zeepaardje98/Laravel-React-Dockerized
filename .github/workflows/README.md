@@ -21,8 +21,10 @@ Configure these secrets in your repository settings (Settings → Secrets and va
 
 #### DigitalOcean:
 - `DO_TOKEN` - Your DigitalOcean API token
-- `DO_SPACES_ACCESS_KEY` - DigitalOcean Spaces access key (for remote state)
-- `DO_SPACES_SECRET_KEY` - DigitalOcean Spaces secret key (for remote state)
+- `DO_SPACES_ACCESS_KEY` - DigitalOcean Spaces access key ID (required for remote state)
+- `DO_SPACES_SECRET_KEY` - DigitalOcean Spaces secret key (required for remote state)
+
+**Note**: Spaces credentials must be created manually in DigitalOcean Console → API → Spaces Keys before using this workflow.
 
 #### AWS:
 - `AWS_ACCESS_KEY_ID` - AWS access key
