@@ -1,105 +1,94 @@
-# Terraform Deployments
+# Terraform Infrastructure Organization
 
-This directory contains Terraform configurations for deploying infrastructure across multiple cloud providers.
-
-## Available Providers
-
-### DigitalOcean
-- **Basic Droplet** (`digitalocean/basic-droplet/`) - Single Ubuntu droplet (~$6/month)
-- **Future Configurations**: Managed database, load balancer, Kubernetes cluster
-
-### Future Providers
-- **AWS** - EC2 instances, RDS databases, EKS clusters
-- **Google Cloud** - Compute Engine, Cloud SQL, GKE clusters
-
-## Quick Start
-
-1. **Choose a configuration**:
-   ```bash
-   cd digitalocean/basic-droplet/
-   ```
-
-2. **Follow provider-specific setup**:
-   Each provider has its own setup instructions. See the individual provider READMEs for detailed steps.
-
-3. **Deploy**:
-   ```bash
-   terraform init
-   terraform plan
-   terraform apply
-   ```
-
-## Multiple Deployments
-
-Use **Terraform Workspaces** for managing multiple environments:
-
-```bash
-# Create workspaces for different environments
-terraform workspace new dev
-terraform workspace new staging
-terraform workspace new prod
-
-# Deploy to specific environment
-terraform workspace select dev
-terraform apply -var="environment=dev"
-
-terraform workspace select staging
-terraform apply -var="environment=staging"
-
-terraform workspace select prod
-terraform apply -var="environment=prod"
-```
-
-## GitHub Actions Integration
-
-The repository includes GitHub Actions workflows for automated deployments. See `.github/workflows/README.md` for detailed setup instructions and configuration.
-
-**Features:**
-- **Automatic deployments** on branch pushes
-- **Manual deployments** with environment selection
+This directory contains Terraform configurations organized by deployment frequency and scope.
 
 ## Directory Structure
 
 ```
 deployment/terraform/
-├── digitalocean/
-│   └── basic-droplet/
-│       ├── bootstrap/
-│       │   ├── main.tf
-│       │   ├── variables.tf
-│       │   ├── outputs.tf
-│       │   ├── terraform.tfvars.example
-│       │   └── README.md
-│       ├── main.tf
-│       ├── variables.tf
-│       ├── outputs.tf
-│       ├── terraform.tfvars.example
-│       └── README.md
-├── aws/              # Future
-├── gcp/              # Future
-├── .gitignore
-└── README.md         # This file
+├── foundation/                    # One-time setup (run once)
+│   ├── github/
+│   │   └── organization/          # GitHub org, teams, members, secrets
+│   └── digitalocean/
+│       └── organization/           # DO teams, projects, shared resources
+├── projects/                      # Per-project setup (run per project)
+│   ├── github/
+│   │   └── repository-module/     # Reusable repo template
+│   └── digitalocean/
+│       ├── server-module/         # Reusable server template
+│       └── projects/              # Individual project configs
+│           ├── project-alpha/
+│           │   ├── github-repo/
+│           │   └── digitalocean-server/
+│           └── project-beta/
+│               ├── github-repo/
+│               └── digitalocean-server/
+└── modules/                      # Shared reusable modules
+    ├── github-repository/
+    ├── digitalocean-droplet/
+    └── digitalocean-project/
 ```
+
+## Deployment Strategy
+
+### **Phase 1: Foundation Setup (Run Once)**
+Deploy organization-level infrastructure that will be shared across all projects:
+
+```bash
+# 1. Set up GitHub organization
+cd foundation/github/organization/
+terraform init && terraform apply
+
+# 2. Set up DigitalOcean organization
+cd foundation/digitalocean/organization/
+terraform init && terraform apply
+```
+
+### **Phase 2: Project Setup (Run Per Project)**
+For each new project, create the necessary resources:
+
+```bash
+# Example: Setting up "project-alpha"
+cd projects/digitalocean/projects/project-alpha/
+
+# Create GitHub repository
+cd github-repo/
+terraform init && terraform apply
+
+# Create DigitalOcean server
+cd ../digitalocean-server/
+terraform init && terraform apply
+```
+
+## Resource Categories
+
+### **Foundation Resources (One-time)**
+- **GitHub**: Organization, teams, members, organization secrets/variables
+- **DigitalOcean**: Teams, projects, shared networking, monitoring
+
+### **Project Resources (Per-project)**
+- **GitHub**: Individual repositories, repository-specific secrets
+- **DigitalOcean**: Droplets, databases, load balancers, project-specific resources
+
+## Benefits of This Structure
+
+✅ **Clear Separation**: Foundation vs project resources
+✅ **Reusability**: Modules can be shared across projects
+✅ **Scalability**: Easy to add new projects
+✅ **State Isolation**: Each project has its own state
+✅ **Team Autonomy**: Different teams can manage their own projects
+✅ **Cost Tracking**: Easy to track costs per project
+
+## Getting Started
+
+1. **Set up foundation first** (GitHub org, DO organization)
+2. **Create your first project** using the templates
+3. **Scale by adding more projects** as needed
 
 ## Best Practices
 
-1. **State Management**: Remote state storage configured for team collaboration
-2. **Secrets**: Never commit API tokens or sensitive data
-3. **Tagging**: All resources are tagged with project and environment
-4. **Naming**: Use consistent naming conventions
-5. **Documentation**: Each configuration has its own README
-
-## Troubleshooting
-
-- **State Issues**: Use `terraform refresh` if resources are out of sync
-- **Provider-specific issues**: See individual provider READMEs for detailed troubleshooting
-
-## Adding New Configurations
-
-To add a new configuration:
-
-1. Create a new directory: `mkdir new-provider/new-config/`
-2. Copy the basic structure from `digitalocean/basic-droplet/`
-3. Modify the Terraform files as needed
-4. Update this README to document the new configuration
-5. Add any new secrets to GitHub Actions workflow
+- **Foundation first**: Always set up organization-level resources before projects
+- **Module reuse**: Use the provided modules for consistency
+- **State management**: Use remote state for team collaboration
+- **Naming conventions**: Follow consistent naming across all resources
+- **Documentation**: Each module should have clear documentation

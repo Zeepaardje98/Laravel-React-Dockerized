@@ -1,0 +1,59 @@
+# Copy this file to terraform.tfvars and fill in your values
+
+# GitHub Authentication
+github_token = "your_github_personal_access_token_here"
+github_organization = "your-github-organization"
+
+# Organization Teams
+organization_teams = {
+  "backend-team" = {
+    name        = "Backend Team"
+    description = "Team responsible for backend development"
+    privacy     = "closed"
+  }
+  "frontend-team" = {
+    name        = "Frontend Team"
+    description = "Team responsible for frontend development"
+    privacy     = "closed"
+  }
+  "devops-team" = {
+    name        = "DevOps Team"
+    description = "Team responsible for infrastructure and deployment"
+    privacy     = "secret"
+  }
+}
+
+# Organization Secrets
+organization_secrets = {
+  "AWS_ACCESS_KEY_ID" = {
+    value      = "your-aws-access-key"
+    visibility = "private"
+  }
+  "AWS_SECRET_ACCESS_KEY" = {
+    value      = "your-aws-secret-key"
+    visibility = "private"
+  }
+  "DOCKER_HUB_TOKEN" = {
+    value      = "your-docker-hub-token"
+    visibility = "private"
+  }
+}
+
+# Organization Variables
+organization_variables = {
+  "ENVIRONMENT" = {
+    value      = "production"
+    visibility = "all"
+  }
+  "REGION" = {
+    value      = "us-east-1"
+    visibility = "all"
+  }
+  "PROJECT_NAME" = {
+    value      = "my-awesome-project"
+    visibility = "all"
+  }
+}
+
+ 
+

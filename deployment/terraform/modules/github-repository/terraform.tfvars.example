@@ -1,0 +1,59 @@
+# Copy this file to terraform.tfvars and fill in your values
+
+# GitHub Authentication
+github_token = "your_github_personal_access_token_here"
+github_owner = "your_github_username_or_org"
+
+# Repository Configuration
+repository_name        = "my-awesome-repo"
+repository_description = "A simple GitHub repository created with Terraform"
+repository_visibility  = "private"  # Options: public, private, internal
+
+# Repository Features
+auto_init     = true   # Initialize with README
+default_branch = "main"
+
+# Repository Features
+has_issues    = true
+has_projects  = false
+has_wiki      = false
+has_downloads = false
+
+# Merge Settings
+allow_merge_commit     = true
+allow_squash_merge     = true
+allow_rebase_merge     = true
+allow_auto_merge       = false
+delete_branch_on_merge = true
+
+# Security Settings
+vulnerability_alerts = true
+archive_on_destroy   = true
+
+# Topics/Tags (optional)
+topics = ["terraform", "github", "automation"]
+
+# Template Repository (optional - leave empty to not use a template)
+template_owner    = ""
+template_repository = ""
+
+# Branch Protection (optional)
+enable_branch_protection = false
+require_status_checks    = false
+required_status_check_contexts = []
+dismiss_stale_reviews   = true
+require_code_owner_reviews = false
+required_approving_review_count = 1
+restrict_pushes         = false
+allows_force_pushes     = false
+allows_deletions        = false
+
+# Repository Secrets (optional)
+repository_secrets = {
+  # "SECRET_NAME" = "secret_value"
+}
+
+# Repository Variables (optional)
+repository_variables = {
+  # "VARIABLE_NAME" = "variable_value"
+}
