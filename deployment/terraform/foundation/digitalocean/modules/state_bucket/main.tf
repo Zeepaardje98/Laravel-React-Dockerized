@@ -22,10 +22,20 @@ resource "digitalocean_spaces_bucket" "terraform_state" {
   force_destroy = true
 }
 
-# Create a bucket-specific Spaces access key for this project
-resource "digitalocean_spaces_key" "terraform_state" {
-  name     = "${lower(replace(data.digitalocean_project.existing.name, " ", "-"))}.terraform-state-key"
-  
+# Create a bucket-specific Spaces access key for local usage (e.g., engineers running Terraform locally)
+resource "digitalocean_spaces_key" "terraform_state_local" {
+  name = "${lower(replace(data.digitalocean_project.existing.name, " ", "-"))}.terraform-state-key-local"
+
+  grant {
+    bucket     = digitalocean_spaces_bucket.terraform_state.name
+    permission = "readwrite"
+  }
+}
+
+# Create a bucket-specific Spaces access key for CI/CD usage (to be stored in GitHub org secrets)
+resource "digitalocean_spaces_key" "terraform_state_ci" {
+  name = "${lower(replace(data.digitalocean_project.existing.name, " ", "-"))}.terraform-state-key-ci"
+
   grant {
     bucket     = digitalocean_spaces_bucket.terraform_state.name
     permission = "readwrite"

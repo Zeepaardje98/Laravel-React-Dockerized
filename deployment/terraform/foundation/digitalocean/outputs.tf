@@ -8,15 +8,27 @@ output "space_name" {
   description = "Spaces bucket name, used for remote state storage"
 }
 
-output "bucket_spaces_access_key" {
-  value       = module.state_bucket.spaces_access_key
+output "bucket_spaces_access_key_local" {
+  value       = module.state_bucket.spaces_access_key_local
   sensitive   = true
-  description = "Bucket-specific Spaces access key for remote state backend"
+  description = "Bucket-specific Spaces access key for remote state backend (local usage)"
 }
 
-output "bucket_spaces_secret_key" {
-  value       = module.state_bucket.spaces_secret_key
+output "bucket_spaces_secret_key_local" {
+  value       = module.state_bucket.spaces_secret_key_local
   sensitive   = true
-  description = "Bucket-specific Spaces secret key for remote state backend"
+  description = "Bucket-specific Spaces secret key for remote state backend (local usage)"
+}
+
+output "bucket_spaces_access_key_ci" {
+  value       = module.state_bucket.spaces_access_key_ci
+  sensitive   = true
+  description = "Bucket-specific Spaces access key for remote state backend (CI/CD usage)"
+}
+
+output "bucket_spaces_secret_key_ci" {
+  value       = module.state_bucket.spaces_secret_key_ci
+  sensitive   = true
+  description = "Bucket-specific Spaces secret key for remote state backend (CI/CD usage)"
 }
 

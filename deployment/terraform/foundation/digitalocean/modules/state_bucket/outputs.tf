@@ -30,14 +30,26 @@ output "project_name" {
   value       = data.digitalocean_project.existing.name
 }
 
-output "spaces_access_key" {
-  description = "Generated bucket-specific Spaces access key"
-  value       = digitalocean_spaces_key.terraform_state.access_key
+output "spaces_access_key_local" {
+  description = "Bucket-specific Spaces access key for local usage"
+  value       = digitalocean_spaces_key.terraform_state_local.access_key
   sensitive   = true
 }
 
-output "spaces_secret_key" {
-  description = "Generated bucket-specific Spaces secret key"
-  value       = digitalocean_spaces_key.terraform_state.secret_key
+output "spaces_secret_key_local" {
+  description = "Bucket-specific Spaces secret key for local usage"
+  value       = digitalocean_spaces_key.terraform_state_local.secret_key
+  sensitive   = true
+}
+
+output "spaces_access_key_ci" {
+  description = "Bucket-specific Spaces access key for CI/CD usage"
+  value       = digitalocean_spaces_key.terraform_state_ci.access_key
+  sensitive   = true
+}
+
+output "spaces_secret_key_ci" {
+  description = "Bucket-specific Spaces secret key for CI/CD usage"
+  value       = digitalocean_spaces_key.terraform_state_ci.secret_key
   sensitive   = true
 }
