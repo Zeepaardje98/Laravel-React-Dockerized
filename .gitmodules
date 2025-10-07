@@ -1,0 +1,4 @@
+[submodule "deployment/foundation"]
+	path = deployment/foundation
+	url = git@github.com:Zeepaardje98/cloud-setup.foundation.git
+	branch = main
