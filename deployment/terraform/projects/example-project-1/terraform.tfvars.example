@@ -1,0 +1,4 @@
+# Repository Configuration
+repository_name = "my-awesome-project"
+repository_description = "Repository for my awesome project"
+repository_visibility = "private"  # Options: public, private, internal

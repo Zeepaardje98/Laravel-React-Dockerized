@@ -1,13 +1,12 @@
-# GitHub Token - Personal Access Token with repo permissions
+# GitHub Authentication
 variable "github_token" {
   description = "GitHub Personal Access Token"
   type        = string
   sensitive   = true
 }
 
-# GitHub Owner (username or organization)
 variable "github_owner" {
-  description = "GitHub username or organization name"
+  description = "GitHub organization name"
   type        = string
 }
 
@@ -31,29 +30,4 @@ variable "repository_visibility" {
     condition     = contains(["public", "private", "internal"], var.repository_visibility)
     error_message = "Repository visibility must be one of: public, private, internal."
   }
-}
-
-variable "auto_init" {
-  description = "Initialize the repository with a README"
-  type        = bool
-  default     = true
-}
-
-variable "topics" {
-  description = "Repository topics/tags"
-  type        = list(string)
-  default     = []
-}
-
-# Template Repository (optional)
-variable "template_owner" {
-  description = "Owner of the template repository"
-  type        = string
-  default     = "Zeepaardje98"
-}
-
-variable "template_repository" {
-  description = "Name of the template repository"
-  type        = string
-  default     = "Laravel-React-Dockerized"
 }
