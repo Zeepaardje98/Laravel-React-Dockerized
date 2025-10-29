@@ -1,9 +1,9 @@
-output "admin_access_key" {
-  value     = module.key.admin_access_key
+output "spaces_access_id" {
+  value     = module.key.spaces_access_id
   sensitive = true
 }
 
-output "admin_secret_key" {
-  value     = module.key.admin_secret_key
+output "spaces_secret_key" {
+  value     = module.key.spaces_secret_key
   sensitive = true
 }

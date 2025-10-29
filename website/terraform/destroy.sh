@@ -2,13 +2,24 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-BOOTSTRAP="$ROOT/bootstrap"
-MAIN="$ROOT/main"
 
-cd "$BOOTSTRAP"
+cd "$ROOT/bootstrap"
 
+terraform init -input=false
+terraform apply -input=false -auto-approve
+
+# capture outputs
+export TF_VAR_spaces_access_id=$(terraform output -raw spaces_access_id)
+export TF_VAR_spaces_secret_key=$(terraform output -raw spaces_secret_key)
+
+cd "$ROOT/main"
+
+terraform init -input=false
 terraform destroy -auto-approve
 
-cd "$MAIN"
+# cleanup sensitive env
+unset TF_VAR_spaces_access_id TF_VAR_spaces_secret_key
+
+cd "$ROOT/bootstrap"
 
 terraform destroy -auto-approve

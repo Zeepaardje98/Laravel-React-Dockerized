@@ -2,29 +2,25 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-BOOTSTRAP="$ROOT/bootstrap"
-MAIN="$ROOT/main"
 
-cd "$BOOTSTRAP"
+cd "$ROOT/bootstrap"
 
 terraform init -input=false
 terraform apply -input=false -auto-approve
 
 # capture outputs
-ADMIN_AK=$(terraform output -raw admin_access_key)
-ADMIN_SK=$(terraform output -raw admin_secret_key)
+export TF_VAR_spaces_access_id=$(terraform output -raw spaces_access_id)
+export TF_VAR_spaces_secret_key=$(terraform output -raw spaces_secret_key)
 
 # pass to stack2 via TF_VAR (recommended)
-cd "$MAIN"
-export TF_VAR_admin_access_key="$ADMIN_AK"
-export TF_VAR_admin_secret_key="$ADMIN_SK"
+cd "$ROOT/main"
 
 terraform init -input=false
 terraform apply -auto-approve
 
 # cleanup sensitive env
-unset TF_VAR_admin_access_key TF_VAR_admin_secret_key
+unset TF_VAR_spaces_access_id TF_VAR_spaces_secret_key
 
-cd "$BOOTSTRAP"
+cd "$ROOT/bootstrap"
 
 terraform destroy -auto-approve
