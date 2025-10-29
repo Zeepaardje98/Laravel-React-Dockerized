@@ -4,22 +4,19 @@ module "project" {
 
 module "bucket" {
   source     = "./modules/bucket"
+  project_id = module.project.id
   depends_on = [module.project]
 }
 
 module "droplet" {
   source       = "./modules/droplet"
+  project_id   = module.project.id
   ssh_key_name = var.ssh_key_name
   depends_on   = [module.project]
 }
 
 module "database" {
   source     = "./modules/database"
+  project_id = module.project.id
   depends_on = [module.project]
-}
-
-resource "digitalocean_project_resources" "resources" {
-  depends_on = [module.bucket, module.droplet, module.project, module.database]
-  project    = module.project.id
-  resources  = [module.database.urn, module.bucket.urn, module.droplet.urn]
 }

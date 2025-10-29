@@ -13,3 +13,8 @@ resource "digitalocean_spaces_key" "scoped" {
     permission = "readwrite"
   }
 }
+
+resource "digitalocean_project_resources" "assign_resources" {
+  project   = var.project_id
+  resources = [digitalocean_spaces_bucket.my_bucket.urn]
+}

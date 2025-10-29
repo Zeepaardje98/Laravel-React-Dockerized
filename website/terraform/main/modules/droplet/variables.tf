@@ -23,6 +23,10 @@ variable "image" {
   default = "ubuntu-22-04-x64"
 }
 
+variable "project_id" {
+  type = string
+}
+
 data "digitalocean_ssh_key" "me" {
   name = var.ssh_key_name
 }

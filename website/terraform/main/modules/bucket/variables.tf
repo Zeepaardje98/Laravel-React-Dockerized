@@ -18,3 +18,6 @@ variable "key_name" {
   default = "scoped-key"
 }
 
+variable "project_id" {
+  type = string
+}

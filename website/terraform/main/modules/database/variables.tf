@@ -37,3 +37,7 @@ variable "user_name" {
   type    = string
   default = "appuser"
 }
+
+variable "project_id" {
+  type = string
+}
