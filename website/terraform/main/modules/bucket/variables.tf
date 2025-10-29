@@ -1,6 +1,6 @@
 variable "name" {
   type    = string
-  default = "super-dependable-bucket-name"
+  default = "super-unique-bucket-name"
 }
 
 variable "region" {
