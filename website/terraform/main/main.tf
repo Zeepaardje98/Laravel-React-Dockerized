@@ -13,13 +13,13 @@ module "droplet" {
   depends_on   = [module.project]
 }
 
-# module "database" {
-#   source     = "./modules/database"
-#   depends_on = [module.project]
-# }
+module "database" {
+  source     = "./modules/database"
+  depends_on = [module.project]
+}
 
-resource "digitalocean_project_resources" "aaaaaa" {
-  depends_on = [module.bucket, module.droplet, module.project]
+resource "digitalocean_project_resources" "resources" {
+  depends_on = [module.bucket, module.droplet, module.project, module.database]
   project    = module.project.id
-  resources  = [module.droplet.urn, module.bucket.urn]
+  resources  = [module.database.urn, module.bucket.urn, module.droplet.urn]
 }
