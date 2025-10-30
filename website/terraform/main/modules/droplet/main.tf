@@ -1,5 +1,5 @@
 resource "digitalocean_droplet" "my_droplet" {
-  name     = var.name
+  name     = local.name
   region   = var.region
   size     = var.size
   image    = var.image

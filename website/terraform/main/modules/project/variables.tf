@@ -1,11 +1,11 @@
 variable "name" {
   type    = string
-  default = "project name"
+  default = "project-name"
 }
 
 variable "description" {
   type    = string
-  default = "project description"
+  default = "This is is the default description text."
 }
 
 variable "environment" {

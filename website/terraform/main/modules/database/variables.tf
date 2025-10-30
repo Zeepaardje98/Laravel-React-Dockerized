@@ -35,7 +35,7 @@ variable "database_name" {
 
 variable "user_name" {
   type    = string
-  default = "appuser"
+  default = "user-name"
 }
 
 variable "project_id" {

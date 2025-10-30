@@ -5,7 +5,7 @@ variable "ssh_key_name" {
 
 variable "name" {
   type    = string
-  default = "example-droplet"
+  default = "droplet-name"
 }
 
 variable "region" {

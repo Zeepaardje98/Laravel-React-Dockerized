@@ -1,5 +1,5 @@
 resource "digitalocean_project" "my_project" {
-  name        = var.name
+  name        = local.name
   description = var.description
   environment = var.environment
 }
